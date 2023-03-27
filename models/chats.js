@@ -4,7 +4,7 @@ const chatSchema = mongoose.Schema({
     author : String, 
     message : String, 
     date : Date,
-    messages : [[{ type: mongoose.Schema.Types.ObjectId, ref: 'messages' }]]
+    edited : Boolean
 })
 
 const Chat = mongoose.model("chats", chatSchema)

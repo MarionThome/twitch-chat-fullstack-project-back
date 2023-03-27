@@ -1,9 +1,11 @@
 const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
-    user : String, 
+    token : String,
+    username : String, 
     registrationDate : Date,
     color : String,
+    messages : [{ type: mongoose.Schema.Types.ObjectId, ref: 'chats' }]
 })
 
 const User = mongoose.model("users", userSchema)
