@@ -19,6 +19,19 @@ router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
+router.get("/messages", async (req, res) => {
+  try{
+    const data = await Chat.find({})
+    if(data === null) {
+      res.json({result : false})
+    } else  {
+      res.json({result : true, messages : data})
+    }
+  }
+  catch(error){
+    console.error(error)
+  }
+})
 
 // send new message 
 router.post("/send-message", async (req, res) => {
