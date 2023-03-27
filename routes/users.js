@@ -34,7 +34,7 @@ router.post('/new-user', async (req, res) => {
       const token = uid2(32);
       const newUser = new User({
         token : token,
-        user: req.body.username,
+        username: req.body.username,
         registrationDate : new Date(),
         color : userColor,
         messages : [],

@@ -75,6 +75,13 @@ router.delete('/', (req, res) => {
   })
 })
 
+// delete one message based on id
+router.delete('/:id', (req, res) => {
+  Chat.deleteOne({_id : req.params.id}).then(()=>{
+    res.json({result : true})
+  })
+})
+
 
 
 module.exports = router;
