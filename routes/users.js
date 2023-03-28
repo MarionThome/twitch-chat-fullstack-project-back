@@ -51,4 +51,10 @@ router.post('/new-user', async (req, res) => {
   }
 })
 
+router.delete("/all", (req, res) => {
+  User.deleteMany({}).then(() => {
+    res.json({ result: true });
+  });
+});
+
 module.exports = router;
