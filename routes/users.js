@@ -30,7 +30,7 @@ router.post('/new-user', async (req, res) => {
     const data = await User.findOne({ username: req.body.username });
     console.log(colors)
     if (data === null) {
-      const userColor = colors[Math.floor(Math.random() * 275)]
+      const userColor = colors[Math.floor(Math.random() * 100)]
       const token = uid2(32);
       const newUser = new User({
         token : token,
