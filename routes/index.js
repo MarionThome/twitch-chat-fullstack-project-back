@@ -40,6 +40,7 @@ router.post("/send-message", async (req, res) => {
       message: req.body.message,
       date: new Date(),
       edited: false,
+      deleted : false
     };
     const newChat = new Chat(payload);
     await newChat.save();
@@ -63,6 +64,7 @@ router.post("/send-message", async (req, res) => {
 // update message
 router.put("/update-message/:id", async (req, res) => {
   try {
+    console.log("yo")
     await pusher.trigger("chat", "messageToUpdate", {id : req.params.id, message: req.body.message})
     
     if (req.body.message) {
@@ -74,6 +76,26 @@ router.put("/update-message/:id", async (req, res) => {
         { new: true }
       );
       res.json({ result: true, updatedMessage: updatedMessage });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+//delete message content
+router.put("/remove-message/:id", async (req, res) => {
+  try {
+    await pusher.trigger("chat", "messageToRemove", {id : req.params.id, message: "message deleted"})
+    
+    if (req.body.message) {
+      const deletedMessage = await Chat.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          $set: { message: "message deleted", deleted: true },
+        },
+        { new: true }
+      );
+      res.json({ result: true, deletedMessage: deletedMessage });
     }
   } catch (error) {
     console.error(error);
