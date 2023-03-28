@@ -41,9 +41,9 @@ router.post("/send-message", async (req, res) => {
       date: new Date(),
       edited: false,
     };
-    await pusher.trigger("chat", "message", payload);
     const newChat = new Chat(payload);
     await newChat.save();
+    await pusher.trigger("chat", "message", newChat);
 
     // add foreign key to the user
     await User.findOneAndUpdate(
@@ -54,7 +54,7 @@ router.post("/send-message", async (req, res) => {
         },
       }
     );
-    res.send(payload);
+    res.json({result : true, newMessage : newChat});
   } catch (error) {
     res.status(500).send("Error sending message");
   }
@@ -63,6 +63,8 @@ router.post("/send-message", async (req, res) => {
 // update message
 router.put("/update-message/:id", async (req, res) => {
   try {
+    await pusher.trigger("chat", "messageToUpdate", {id : req.params.id, message: req.body.message})
+    
     if (req.body.message) {
       const updatedMessage = await Chat.findOneAndUpdate(
         { _id: req.params.id },
