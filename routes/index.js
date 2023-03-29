@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 const Pusher = require("pusher");
-const bodyParser = require("body-parser");
 var Chat = require("../models/chats");
 var User = require("../models/users");
 
