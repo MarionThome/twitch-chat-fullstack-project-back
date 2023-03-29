@@ -4,7 +4,6 @@ const Pusher = require("pusher");
 const bodyParser = require("body-parser");
 var Chat = require("../models/chats");
 var User = require("../models/users");
-const { findOneAndUpdate } = require("../models/chats");
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -28,7 +27,7 @@ router.get("/messages", async (req, res) => {
       res.json({ result: true, messages: data });
     }
   } catch (error) {
-    console.error(error);
+    res.status(500).json({ error: `error while fetching all messages.` });
   }
 });
 
@@ -40,7 +39,7 @@ router.post("/send-message", async (req, res) => {
       message: req.body.message,
       date: new Date(),
       edited: false,
-      deleted : false
+      deleted: false,
     };
     const newChat = new Chat(payload);
     await newChat.save();
@@ -55,7 +54,7 @@ router.post("/send-message", async (req, res) => {
         },
       }
     );
-    res.json({result : true, newMessage : newChat});
+    res.json({ result: true, newMessage: newChat });
   } catch (error) {
     res.status(500).send("Error sending message");
   }
@@ -64,9 +63,11 @@ router.post("/send-message", async (req, res) => {
 // update message
 router.put("/update-message/:id", async (req, res) => {
   try {
-    console.log("yo")
-    await pusher.trigger("chat", "messageToUpdate", {id : req.params.id, message: req.body.message})
-    
+    await pusher.trigger("chat", "messageToUpdate", {
+      id: req.params.id,
+      message: req.body.message,
+    });
+
     if (req.body.message) {
       const updatedMessage = await Chat.findOneAndUpdate(
         { _id: req.params.id },
@@ -78,15 +79,22 @@ router.put("/update-message/:id", async (req, res) => {
       res.json({ result: true, updatedMessage: updatedMessage });
     }
   } catch (error) {
-    console.error(error);
+    res
+      .status(500)
+      .json({
+        error: `error while updating the message with id ${req.params.id}.`,
+      });
   }
 });
 
 //delete message content
 router.put("/remove-message/:id", async (req, res) => {
   try {
-    await pusher.trigger("chat", "messageToRemove", {id : req.params.id, message: "message deleted"})
-    
+    await pusher.trigger("chat", "messageToRemove", {
+      id: req.params.id,
+      message: "message deleted",
+    });
+
     if (req.body.message) {
       const deletedMessage = await Chat.findOneAndUpdate(
         { _id: req.params.id },
@@ -98,22 +106,36 @@ router.put("/remove-message/:id", async (req, res) => {
       res.json({ result: true, deletedMessage: deletedMessage });
     }
   } catch (error) {
-    console.error(error);
+    res
+      .status(500)
+      .json({
+        error: `error while removing the content of the message with id ${req.params.id}.`,
+      });
   }
 });
 
 // delete all messages
-router.delete("/", (req, res) => {
-  Chat.deleteMany({}).then(() => {
+router.delete("/", async (req, res) => {
+  try {
+    await Chat.deleteMany({});
     res.json({ result: true });
-  });
+  } catch (error) {
+    res.status(500).json({ error: "error while deleting all messages." });
+  }
 });
 
 // delete one message based on id
-router.delete("/:id", (req, res) => {
-  Chat.deleteOne({ _id: req.params.id }).then(() => {
+router.delete("/:id", async (req, res) => {
+  try {
+    await Chat.deleteOne({ _id: req.params.id });
     res.json({ result: true });
-  });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        error: `error while deleting message with id ${req.params.id}.`,
+      });
+  }
 });
 
 module.exports = router;
